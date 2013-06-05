@@ -115,7 +115,7 @@ public class Boiler extends _BoilerDisp {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         item_found = true;
-        return ietm.getProxy().getTemperature(secret);
+        return item.getProxy().getTemperature(secret);
       }
     }
     throw new ItemNotFoundException();
