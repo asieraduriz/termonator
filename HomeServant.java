@@ -1,38 +1,60 @@
 
-import utils._DeviceIDisp;
-
+import utils._ControllerDisp;
+import utils.InvalidSecretException;
 import Ice.Current;
 
-public class HomeServant extends _DeviceIDisp {
+@SuppressWarnings("serial")
+public class HomeServant extends _ControllerDisp {
 
+	//Controller
 	private Home _home;
+	//Boiler
 	
-	public HomeServant () { //falta el prx de Controlador -> ice de Dani
-		_home = new Home();
+	public HomeServant (Home home) {
+		_home = home;
 		_home.start();
 	}
 	
-	
-	public boolean heaterOn(Current __current) {
-		return _home.setHeaterOn();
+	public boolean heaterOn(String secret, Current __current) 
+	       throws InvalidSecretException {
+	  checkSecret(secret);
+	  return _home.setHeaterOn();
 	}
 
-	public boolean heaterOff(Current __current) {
+	public boolean heaterOff(String secret, Current __current) 
+         throws InvalidSecretException {
+	  checkSecret(secret);
 		return _home.setHeaterOff();
 	}
 
-	public boolean setTemperature(double temperature, Current __current) {
+	public boolean setTemperature(String secret, double temperature, 
+	                              Current __current) 
+	       throws InvalidSecretException {
+	  checkSecret(secret);
 		return _home.updateTemperature(temperature);
-		
 	}
 
-	public boolean getStatus(Current __current) {
+  public double getTemperature(String secret, Current __current)
+      throws InvalidSecretException {
+    return _home.getTemperature();
+  }
+	
+	public boolean getStatus(String secret, Current __current) 
+	       throws InvalidSecretException {
+	  checkSecret(secret);
 		return _home.getStatus();
 	}
 
-	public double getConsumption(Current __current) {
-		
+	public double getConsumption(String secret, Current __current) 
+	       throws InvalidSecretException {
+	  checkSecret(secret);
 		return 0;
+	}
+
+	private void checkSecret (String possibleSecret) 
+	        throws InvalidSecretException {
+	  if(!_home.getSecret().equals(possibleSecret)) 
+	    throw new InvalidSecretException();
 	}
 
 }
