@@ -107,6 +107,20 @@ public class Boiler extends _BoilerDisp {
     throw new ItemNotFoundException();
   }
 
+  public double getHeatingTemperature(String secret, int floor, String door,
+                                       Current __current)
+                                       throws InvalidSecretException,
+                                              ItemNotFoundException {
+    boolean item_found = false;
+    for(Controller item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor() == door) {
+        item_found = true;
+        return ietm.getProxy().getTemperature(secret);
+      }
+    }
+    throw new ItemNotFoundException();
+  }
+
   public double getHeatingConsumption(int floor, String door,
                                       Current __current)
                                       throws ItemNotFoundException {
