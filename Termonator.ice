@@ -9,6 +9,7 @@ module utils {
     bool heaterOn (string secret) throws InvalidSecretException;
     bool heaterOff (string secret) throws InvalidSecretException;
     bool setTemperature (string secret, double temperature) throws InvalidSecretException;
+    double getTemperature (string secret) throws InvalidSecretException;
     bool getStatus (string secret) throws InvalidSecretException;
     double getConsumption (string secret) throws InvalidSecretException;
   };	
@@ -16,7 +17,7 @@ module utils {
     bool turnOn();
     bool turnOff();
     bool getStatus();
-    bool addController(string secret, int floor, string door, utils::Controller* proxy);
+    bool addController(int floor, string door, utils::Controller* proxy);
     bool turnOnHeating(string secret, int floor, string door);
     bool turnOffHeating(string secret, int floor, string door);
     void changeTemperature(string secret, int floor, string door, double temperature);
