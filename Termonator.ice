@@ -9,6 +9,7 @@ module utils {
     bool heaterOn (string secret) throws InvalidSecretException;
     bool heaterOff (string secret) throws InvalidSecretException;
     bool setTemperature (string secret, double temperature) throws InvalidSecretException;
+    double getTemperature (string secret) throws InvalidSecretException;
     bool getStatus (string secret) throws InvalidSecretException;
     double getConsumption ();
   };	
