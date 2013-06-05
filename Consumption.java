@@ -11,8 +11,10 @@ public class Consumption extends Thread {
   }
   
   public void run () {
+    
     while (true) {
       while(_status) {
+        
         try {
           Thread.sleep(300);
           if(_status)
@@ -39,15 +41,21 @@ public class Consumption extends Thread {
     return _consumption;
   }
   
+  synchronized void resetConsumption () {
+    _consumption = 0;
+  }
+  
   synchronized public void setStatusOn () {
     _status = true;
     notify();
   }
   
   synchronized public void setStatusOff () {
-    
+    _status = false;
   }
   
-  
+  synchronized public boolean getStatus () {
+    return _status;
+  }
   
 }
