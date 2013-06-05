@@ -15,6 +15,16 @@ public class Boiler extends _BoilerDisp {
     controllerList = new ArrayList<Controller>();
   }
 
+  protected ControllerPrx findProxy(int floor, String door)
+                                    throws ItemNotFoundException {
+    for(Controller item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor().equals(door)) {
+        return findProxy(floor, door);
+      }
+    }
+    throw new ItemNotFoundException();
+  }
+
   public boolean addController(int floor, String door, ControllerPrx proxy,
                             Current __current) {
     Controller tmpController = new Controller(floor, door, proxy);
@@ -52,85 +62,48 @@ public class Boiler extends _BoilerDisp {
                                 Current __current)
                                 throws InvalidSecretException,
                                        ItemNotFoundException {
-    for(Controller item: controllerList) {
-      if(item.getFloor() == floor && item.getDoor() == door) {
-        if(item.getProxy().heaterOff(secret) == false) {
-          return false;
-        } else {
-          return true;
-        }
-      }
+    if(findProxy(floor, door).heaterOff(secret) == false) {
+      return false;
+    } else {
+      return true;
     }
-    throw new ItemNotFoundException();
   }
   
   public boolean turnOnHeating(String secret, int floor, String door,
                                Current __current)
                                throws InvalidSecretException,
                                       ItemNotFoundException {
-    for(Controller item: controllerList) {
-      if(item.getFloor() == floor && item.getDoor() == door) {
-        if(item.getProxy().heaterOn(secret) == false) {
-          return false;
-        } else {
-          return true;
-        }
-      }
+    if(findProxy(floor, door).heaterOn(secret) == false) {
+      return false;
+    } else {
+      return true;
     }
-    throw new ItemNotFoundException();
   }
 
   public void changeTemperature(String secret, int floor, String door,
                                 double temperature, Current __current)
                                 throws InvalidSecretException,
                                        ItemNotFoundException {
-    for(Controller item: controllerList) {
-      if(item.getFloor() == floor && item.getDoor() == door) {
-        item.getProxy().setTemperature(secret, temperature);
-        break;
-      }
-    }
-    throw new ItemNotFoundException();
+    findProxy(floor, door).setTemperature(secret, temperature);
   }
 
   public boolean getHeatingStatus(String secret, int floor, String door,
                                   Current __current)
                                   throws InvalidSecretException,
                                          ItemNotFoundException {
-    boolean item_found = false;
-    for(Controller item: controllerList) {
-      if(item.getFloor() == floor && item.getDoor() == door) {
-        item_found = true;
-        return item.getProxy().getStatus(secret);
-      }
-    }
-    throw new ItemNotFoundException();
+    return findProxy(floor, door).getStatus(secret);
   }
 
   public double getHeatingTemperature(String secret, int floor, String door,
                                        Current __current)
                                        throws InvalidSecretException,
                                               ItemNotFoundException {
-    boolean item_found = false;
-    for(Controller item: controllerList) {
-      if(item.getFloor() == floor && item.getDoor() == door) {
-        item_found = true;
-        return item.getProxy().getTemperature(secret);
-      }
-    }
-    throw new ItemNotFoundException();
+    return findProxy(floor, door).getTemperature(secret);
   }
 
   public double getHeatingConsumption(int floor, String door,
                                       Current __current)
                                       throws ItemNotFoundException {
-    boolean item_found = false;
-    for(Controller item: controllerList) {
-      if(item.getFloor() == floor && item.getDoor() == door) {
-        item_found = true;
-        return item.getProxy().getConsumption();
-      }
-    }
-    throw new ItemNotFoundException();
+    return findProxy(floor, door).getConsumption();
   }
 }
