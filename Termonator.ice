@@ -17,7 +17,7 @@ module utils {
     bool turnOn();
     bool turnOff();
     bool getStatus();
-    bool addController(int floor, string door, utils::Controller* proxy) throws InvalidSecretException, ItemNotFoundException;
+    bool addController(int floor, string door, utils::Controller* proxy);
     bool turnOnHeating(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
     bool turnOffHeating(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
     void changeTemperature(string secret, int floor, string door, double temperature) throws InvalidSecretException, ItemNotFoundException;

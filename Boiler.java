@@ -19,7 +19,7 @@ public class Boiler extends _BoilerDisp {
                                     throws ItemNotFoundException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor().equals(door)) {
-        return findProxy(floor, door);
+        return item.getProxy();
       }
     }
     throw new ItemNotFoundException();
@@ -28,11 +28,12 @@ public class Boiler extends _BoilerDisp {
   public boolean addController(int floor, String door, ControllerPrx proxy,
                             Current __current) {
     Controller tmpController = new Controller(floor, door, proxy);
-    if(controllerList.contains(tmpController) == false) {
+    try {
+      findProxy(floor, door);
+      return false;
+    } catch(ItemNotFoundException e) {
       controllerList.add(tmpController);
       return true;
-    } else {
-      return false;
     }
   }
 
