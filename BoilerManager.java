@@ -8,20 +8,25 @@ public class BoilerManager {
   public static void main(String[] args){
 
     Ice.Object boiler = new Boiler();
-    Ice.Communicator iceCommunicator;
-    Ice.ObjectAdapter boilerAdapter;
 
-    iceCommunicator = Ice.Util.initialize(args);
-    boilerAdapter = iceCommunicator.createObjectAdapter("BoilerAdapter");
+    Ice.Communicator iceCom = Ice.Util.initialize(args);
 
-    boilerAdapter.add(boiler, iceCommunicator.stringToIdentity("BoilerID"));
-    Ice.ObjectPrx boilerObjPrx = boilerAdapter.addWithUUID(boiler);
+    Ice.ObjectPrx dataBaseObjPrx;
+    dataBaseObjPrx = iceCom.propertyToProxy("DataBase.Proxy");
+    DataBasePrx dataBasePrx = DataBasePrxHelper.checkedCast(dataBaseObjPrx);
+
+    Ice.ObjectAdapter boilerAdap = iceCom.createObjectAdapter("BoilerAdap");
+    Ice.ObjectPrx boilerObjPrx = boilerAdap.addWithUUID(boiler);
+    boilerAdap.add(boiler, iceCom.stringToIdentity("BoilerID"));
     BoilerPrx boilerPrx = BoilerPrxHelper.checkedCast(boilerObjPrx);
 
-    boilerAdapter.activate();
+    boilerAdap.activate();
 
-    /*Ice.ObjectPrx dataBaseObjPrx;
-    dataBaseObjPrx = iceCommunicator.stringToProxy("DataBase@")
-    DataBasePrx dataBasePrx;*/
+    dataBasePrx.addBoilerController("Kale Nagusia", 12, boilerPrx);
+
+    Scanner kb = new Scanner(System.in);
+
+    kb.next();
+    ic.destroy();
   }
 }
