@@ -3,6 +3,7 @@ import utils.FailureIceException;
 import utils.InvalidSecretException;
 import utils.ItemNotFoundException;
 import utils.ControllerPrx;
+import utils.DataBasePrx;
 import Ice.Current;
 import java.util.ArrayList;
 
@@ -13,13 +14,23 @@ public class Boiler extends _BoilerDisp {
 
   private boolean status; ///< Status of the boiler (true = ON, false = OFF)
   private ArrayList<Controller> controllerList; ///< List of home controllers
+  private DataBasePrx incidentServer;
 
   /**
-    @brief 
+    @brief Constructor for the Boiler class
   */
   public Boiler() {
     status = false;
     controllerList = new ArrayList<Controller>();
+    incidentServer = null;
+  }
+
+  /**
+    @brief Sets the server to store the incidents
+    @param iServer The servers proxy
+  */
+  public void setIncidentServer(DataBasePrx iServer) {
+    incidentServer = iServer;
   }
 
   /**
@@ -110,6 +121,11 @@ public class Boiler extends _BoilerDisp {
     }catch(InvalidSecretException | ItemNotFoundException ex1) {
       throw ex1;
     }catch(Exception ex2) {
+      if(incidentServer != null) {
+        String incident = "floor: " + floor + " door: " + door  + " message: "
+                        + ex2.getMessage() + " cause: " + ex2.getCause();
+        incidentServer.SaveIncident(incident);
+      }
       throw new FailureIceException();
     }
   }
@@ -131,6 +147,11 @@ public class Boiler extends _BoilerDisp {
     }catch(InvalidSecretException | ItemNotFoundException ex1) {
       throw ex1;
     }catch(Exception ex2) {
+      if(incidentServer != null) {
+        String incident = "floor: " + floor + " door: " + door  + " message: "
+                        + ex2.getMessage() + " cause: " + ex2.getCause();
+        incidentServer.SaveIncident(incident);
+      }
       throw new FailureIceException();
     }
   }
@@ -152,6 +173,11 @@ public class Boiler extends _BoilerDisp {
     }catch(InvalidSecretException | ItemNotFoundException ex1) {
       throw ex1;
     }catch(Exception ex2) {
+      if(incidentServer != null) {
+        String incident = "floor: " + floor + " door: " + door  + " message: "
+                        + ex2.getMessage() + " cause: " + ex2.getCause();
+        incidentServer.SaveIncident(incident);
+      }
       throw new FailureIceException();
     }
   }
@@ -173,6 +199,11 @@ public class Boiler extends _BoilerDisp {
     }catch(InvalidSecretException | ItemNotFoundException ex1) {
       throw ex1;
     }catch(Exception ex2) {
+      if(incidentServer != null) {
+        String incident = "floor: " + floor + " door: " + door  + " message: "
+                        + ex2.getMessage() + " cause: " + ex2.getCause();
+        incidentServer.SaveIncident(incident);
+      }
       throw new FailureIceException();
     }
   }
@@ -194,6 +225,11 @@ public class Boiler extends _BoilerDisp {
     }catch(InvalidSecretException | ItemNotFoundException ex1) {
       throw ex1;
     }catch(Exception ex2) {
+      if(incidentServer != null) {
+        String incident = "floor: " + floor + " door: " + door  + " message: "
+                        + ex2.getMessage() + " cause: " + ex2.getCause();
+        incidentServer.SaveIncident(incident);
+      }
       throw new FailureIceException();
     }
   }
@@ -213,6 +249,11 @@ public class Boiler extends _BoilerDisp {
     }catch(ItemNotFoundException ex1) {
       throw ex1;
     }catch(Exception ex2) {
+      if(incidentServer != null) {
+        String incident = "floor: " + floor + " door: " + door  + " message: "
+                        + ex2.getMessage() + " cause: " + ex2.getCause();
+        incidentServer.SaveIncident(incident);
+      }
       throw new FailureIceException();
     }
   }

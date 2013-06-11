@@ -12,7 +12,7 @@ public class BoilerManager {
 
   public static void main(String[] args){
 
-    Ice.Object boiler = new Boiler();
+    Boiler boiler = new Boiler();
 
     Ice.Communicator iceCom = Ice.Util.initialize(args);
     Ice.RouterPrx routerPrx = iceCom.getDefaultRouter();
@@ -34,7 +34,8 @@ public class BoilerManager {
     dataBaseObjPrx = iceCom.propertyToProxy("DataBase.Proxy");
     DataBasePrx dataBasePrx = DataBasePrxHelper.uncheckedCast(dataBaseObjPrx);
 
-    System.out.println("PRX "+dataBasePrx);
+    boiler.setIncidentServer(dataBasePrx);
+
     dataBasePrx.addBoilerController("Kale", 12, boilerPrx);
 
     Scanner kb = new Scanner(System.in);
