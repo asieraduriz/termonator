@@ -10,9 +10,14 @@ public class Consumption extends Thread {
     _status = false;
   }
   
+  /**
+   * @brief Función principal donde se deja al hilo en un bucle infinito
+   * para calcular el consumo cuando el estado sea activo, o pararse cuando
+   * el estado sea negativo.
+   */
   public void run () {
     while (true) {
-      while(_status) {
+      while(_status) 
         try {
           Thread.sleep(800);
           if(_status)
@@ -20,63 +25,64 @@ public class Consumption extends Thread {
         } catch (InterruptedException ie) {
           System.err.println("Interrupted while sleeping");
         }
-        
-      }
+      
       goToSleep();
     }
-  }
-  
-  /**
-   * @brief sumar un valor al consumo
-   */
+}
+
+/**
+ * @brief Suma un valor al consumo
+ */
   synchronized private void addConsumption () {
     ++ _consumption;
   }
-  /**
-   * @brief devolver el valor del consumo
-   */
+/**
+ * @brief Devuelve el valor del consumo
+ */
   synchronized double getConsumption () {
-	interrupt();
+    interrupt();
     return _consumption;
   }
-  
-  /**
-   * @brief reiniciar el valor del consumo
-   */
+
+/**
+ * @brief Reinicia el valor del consumo
+ */
   synchronized void resetConsumption () {
     _consumption = 0;
   }
-  
-  /**
-   * @brief declarar la calefacción a encendida
-   */
+
+/**
+ * @brief Función que hará que el consumo se ponga en marcha
+ */
   synchronized public void setStatusOn () {
     System.out.println("Consumption on");
     _status = true;
     notify();
   }
-  
-  /**
-   * @brief declarar la calefacción a apagada
-   */
+
+/**
+ * @brief Función que parará el consumo
+ */
   synchronized public void setStatusOff () {
     System.out.println("Consumption off");
     _status = false;
   }
-  
-  /**
-   * @brief devolver el valor de la calefacción
-   * @return true si está encencida, false si está apagada
-   */
+
+/**
+ * @brief Función para dar a conocer el estado del consumo
+ * @return true si está consumiendo
+ * @return false si no está consumiendo
+ */
   synchronized public boolean getStatus () {
     return _status;
   }
-  
+
+  /**
+   * @brief Función que el único objetivo es dormir al proceso en ejecución
+   */
   synchronized private void goToSleep () {
     try {
-      System.out.println("Lotara");
       wait();
-      System.out.println("Lo ez");
     } catch (InterruptedException ie) {
       System.err.println("Interrupted while waiting");
     }
