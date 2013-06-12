@@ -1,240 +1,166 @@
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.lang.NumberFormatException;
+import java.io.InputStreamReader;
 
-public class Home extends Thread {
-  
-  private final int _SECRET_LENGTH = 4;
-  private final double _PONDER = 1.3;
-  
-  protected BufferedReader br;
-    
-  private int _incomingWaterTemperature;
-  private int _outgoingWaterTemperature;
-  private double _roomTemperature;
-  private double _temperature;
-  private String _secret;
-    
-  Consumption consumption;
+import Ice.Current;
+import utils.InvalidSecretException;
+import utils._ControllerDisp;
 
-  public Home (int incomingWaterTemperature,int outgoingWaterTemperature) {
-    
-    _incomingWaterTemperature = incomingWaterTemperature;
-    _outgoingWaterTemperature = outgoingWaterTemperature;
-    
-    br = new BufferedReader (new InputStreamReader(System.in));
-    
-    _roomTemperature = 20;
-    _temperature = 0;
-    _secret = "0000";
-    
-    consumption = new Consumption();
-  }
+@SuppressWarnings("serial")
+public class Home extends _ControllerDisp {
 
-  public void run () {
-    
-    consumption.start();
-    
-  	int menuChoice = 0;
-  	while(true) {
-  		menuChoice = getMenuChoice();
-  		dispatchMenuChoice (menuChoice);
-  	}
-  }
-  
-
-  synchronized private int getMenuChoice () {
-    
-  	int userChoice = 0;
-  	
-  	printMenu ();
-  	
-  	try {
-  	    userChoice = Integer.valueOf(br.readLine()).intValue();
-  	} catch(IOException ioException) {
-  	    System.err.println("Error reading number");
-  	    return 0;
-  	    
-  	} catch (NumberFormatException nfException) {
-  	    System.err.println("Wrong number format\n");
-  	    return getMenuChoice();
-  	}
-  	
-  	return (isChoiceOk(userChoice))?userChoice:getMenuChoice();
-  	
-  }
-  
-  private void printMenu () {
-    
-  	System.out.println("1.- Turn on the heater");
-  	System.out.println("2.- Turn off the heater");
-  	System.out.println("3.- Change target temperature");
-  	System.out.println("4.- Update room temperature");
-  	System.out.println("5.- Update secret password");
-  	System.out.print("Your choice --> ");
-  	
-  }
-  
-  private boolean isChoiceOk (int choice) {
-  	return (choice > 0 && choice < 6)? true: false;
-  }
-
-  synchronized private void dispatchMenuChoice (int menuChoice) { 
-  	switch (menuChoice) {
-    	case 1:
-    		setHeaterOn();
-    		break;
-    	case 2:
-    		setHeaterOff();
-    		break;
-    	case 3:
-    		updateTemperature (askTemperature()); 
-    		break;
-    	case 4:
-    		updateRoomTemperature (askTemperature()); 
-    		break;
-    	case 5:
-    		updateSecret();
-    		break;
-  	}
-  }
-  
-  synchronized public boolean setHeaterOn () {
-	try {
-	    if(!consumption.getStatus()) {
-	    	
-	    	goAutomatic();
-	    	
-	    	return true;
-	    }
-	    
-	} catch(Exception exception) {
-	    System.err.println("Error while setting the heater on");
+	private final double _PONDER = 1.3;
+	
+	private Consumption _consumption;
+	
+	
+	private double _incomingTemperature;
+	private double _outgoingTemperature;
+	private double _temperature;
+	private double _roomTemperature;
+	private boolean _heaterStatus;
+	private String _secret;
+	
+	public Home (Consumption consumption, double incomingTemperature, 
+			double outgoingTemperature) {
+		_consumption = consumption;
+		_incomingTemperature = incomingTemperature;
+		_outgoingTemperature = outgoingTemperature;
+		_heaterStatus = false;
+		_secret = "0000";
 	}
-	return false;
-  }
-  
-  synchronized public boolean setHeaterOff () {
-	try {
-	    if(consumption.getStatus()) {
+	
+	public boolean heaterOn(String secret, Current __current)
+			throws InvalidSecretException {
+		System.out.println("set heater on request");
+		checkSecret(secret);
+		if(_heaterStatus) 
+			return false;
+		else {
+			_heaterStatus = true;
+			goAutomatic();
+			return true;
+		}
+	}
+
+	public boolean heaterOff(String secret, Current __current)
+			throws InvalidSecretException {
+		System.out.println("set heater off request");
+		
+		checkSecret(secret);
+		return heaterDown();
+	}
+
+	public boolean heaterDown(Current __current) {
+		if(!_heaterStatus) 
+			return false;
+		else {
+			_heaterStatus = false;
+			_consumption.setStatusOff();
+			return true;
+		}
+	}
+
+	public boolean setTemperature(String secret, double temperature,
+			Current __current) throws InvalidSecretException {
+		System.out.println("set temperature request: "+temperature);
+		checkSecret(secret);
+		_temperature = temperature;
+		goAutomatic();
+		return true;
+	}
+
+	public double getTemperature(String secret, Current __current)
+			throws InvalidSecretException {
+		System.out.println("get temperature request");
+		return _temperature;
+	}
+
+	public boolean setRoomTemperature(double roomTemperature) {
+		System.out.println("set room temperature request");
+		_roomTemperature = roomTemperature;
+		goAutomatic();
+		return true;
+	}
+	
+	public boolean getHeatingStatus () {
+		return _heaterStatus;
+	}
+	  
+	public boolean getStatus(String secret, Current __current)
+			throws InvalidSecretException {
+		System.out.println("get status request");
+		return _consumption.getStatus();
+	}
+
+	public double getConsumption(Current __current) {
+		System.out.println("get consumption request");
+	    double coef = 0;
+	    coef = (_incomingTemperature - _outgoingTemperature) * _PONDER;
+	    
+	    double finalConsumption = 0;
+	    finalConsumption = _consumption.getConsumption() * coef;
+	    System.out.println("get consumption consumption");
+	    _consumption.resetConsumption();
+	    System.out.println("reset consumption");
+	    System.out.println("Consumption: "+finalConsumption);
+	    return finalConsumption;
+	}
+
+	  public boolean updateSecret () {
+		  	String secret = new String();
+		  	String reSecret = new String();
+		  	
+		  	System.out.print("Enter new secret password: ");
+		    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+		  	try {
+		  	    secret = br.readLine();
+		  	} catch(IOException ioException) {
+		  	    System.err.println("Error reading first secret");
+		  	}
+		  	
+		  	if(_secret.equals(secret) || secret.isEmpty()) 
+		  	    return false;
+		  	
+		  	System.out.print("Re enter new secret password: ");
+		  	
+		  	try {
+		  	    reSecret = br.readLine();
+		  	} catch(IOException ioException) {
+		  	    System.err.println("Error reading second secret");
+		  		}
+		  		
+		  	if(secret.equals(reSecret) && secret.length() == 4)
+		  	  _secret = secret;
+		  	else
+		  	  return false;
+		  
+		  	return true;
+		  }
+	  
+	  public String getSecret() {
+		  return _secret;
+	  }
+	  
+	  private void goAutomatic () {
+		  System.out.println("go automatic");
+		  if(_heaterStatus) {
+		    if(_consumption.getStatus()) {
+		      if(_temperature <= _roomTemperature) 
+		    	  _consumption.setStatusOff();
+		    } else
+		      if(_temperature > _roomTemperature) 
+		    	  _consumption.setStatusOn();
+		  }
+	  }
+	  
+		private void checkSecret (String possibleSecret) 
+                throws InvalidSecretException {
+			System.out.println("Request for checkSecret");
+			if(!_secret.equals(possibleSecret)) 
+			throw new InvalidSecretException();
 			
-  			consumption.setStatusOff();
-  			
-  			return true;
-	    }
-	    
-	} catch(Exception exception) {
-	    System.err.println("Error while setting the heater off");
-	}
-	return false;
-  }
-
-  synchronized public double askTemperature () { 
-
-  	double temperature = 0;
-	
-  	System.out.print("Enter new temperature --> ");
-	
-  	try {
-  	    temperature = Double.parseDouble(br.readLine());
-  	} catch(IOException ioException) {
-  	    System.err.println("Error reading number");
-  	    temperature = 100;
-  	    
-  	} catch (NumberFormatException nfException) {
-  	    System.err.println("Wrong number format\n");
-  	    return askTemperature();
-  	}
-  	return temperature;
-  }
-
-  synchronized public boolean updateTemperature (double newTemperature) {
-  	try {
-  		_temperature = newTemperature;
-  		goAutomatic ();
-  		
-  	} catch(Exception ex) {
-  		System.err.println("Exception while updating desired temperature");
-  		return false;
-  	}
-  	return true;
-  }
-  
-  synchronized public double getTemperature () {
-    return _temperature;
-  }
-  
-  synchronized private boolean updateRoomTemperature (double newRoomTemperature) {
-  	try {
-  		_roomTemperature = newRoomTemperature;
-  		goAutomatic();
-  		
-  	} catch(Exception ex) {
-  		System.err.println("Exception while updating room temperature");
-  		return false;
-  	}
-  	return true;
-  }
-  
-  synchronized private void goAutomatic () {
-    if(consumption.getStatus()) {
-      if(_temperature <= _roomTemperature) 
-        consumption.setStatusOff();
-    } else
-      if(_temperature > _roomTemperature) 
-        consumption.setStatusOn();
-  }
-  
-  synchronized public boolean getStatus() {
-    return consumption.getStatus();
-  }
-  
-  synchronized public double getConsumption () {
-    double coef = 0;
-    coef = (_incomingWaterTemperature - _outgoingWaterTemperature) * _PONDER;
-    
-    double finalConsumption = 0;
-    finalConsumption = consumption.getConsumption() * coef;
-    
-    consumption.resetConsumption();
-    
-    return finalConsumption;
-  }
-  
-  private boolean updateSecret () {
-  	String secret = new String();
-  	String reSecret = new String();
-  	
-  	System.out.print("Enter new secret password: ");
-  
-  	try {
-  	    secret = br.readLine();
-  	} catch(IOException ioException) {
-  	    System.err.println("Error reading first secret");
-  	}
-  	
-  	if(_secret.equals(secret) || secret.isEmpty()) 
-  	    return false;
-  	
-  	System.out.print("Re enter new secret password: ");
-  	
-  	try {
-  	    reSecret = br.readLine();
-  	} catch(IOException ioException) {
-  	    System.err.println("Error reading second secret");
-  		}
-  		
-  	if(secret.equals(reSecret) && secret.length() == _SECRET_LENGTH)
-  	  _secret = secret;
-  	else
-  	  return false;
-  
-  	return true;
-  }
-  
-  public String getSecret () {
-    return _secret;
-  }
+		}
 }
